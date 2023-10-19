@@ -1,0 +1,42 @@
+name: Build and publish docker images
+on:  
+  push:    
+    branches: [ main ]  
+jobs:   
+  maybe_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Check for dockerfile changes
+        id: image_change
+        run: |
+          REGISTRY=luccpl
+          IMAGE=php-node-ci
+          IMAGE_VERSION=$(grep -oP '(?<=ARG IMAGE_VERSION=).+' ${IMAGE}/Dockerfile)
+          TAGGED_IMAGE=${REGISTRY}/${IMAGE}:${IMAGE_VERSION}
+          echo "Checking for image: $TAGGED_IMAGE"
+
+          TOKEN=$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${{ secrets.DOCKERHUB_USERNAME }}'", "password": "'${{ secrets.DOCKERHUB_TOKEN }}'"}' https://hub.docker.com/v2/users/login/ | jq -r .token)
+          TAG_EXISTS=$(curl -s -H "Authorization: JWT $TOKEN" -H "Accept: application/json" https://hub.docker.com/v2/repositories/${REGISTRY}/${IMAGE}/tags/?page_size=10000 | jq -r '.results[].name' | grep -E "^${IMAGE_VERSION}$" || true)
+
+          if [[ -z "$TAG_EXISTS" ]]; then
+            echo "Tag not found, building and pushing image"
+            echo "IMAGE_TAG=${IMAGE_VERSION}" >> $GITHUB_OUTPUT
+          else
+            echo "Tag found, skipping build and push"
+            echo "IMAGE_TAG=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to DockerHub
+        if: steps.image_change.outputs.IMAGE_TAG != 'false'
+        uses: ./.github/actions/image-publisher
+        with:
+          docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          docker_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          image_registry: luccpl
+          image_repository: php
+          image_tag: ${{ steps.image_change.outputs.IMAGE_TAG }}
+          context: .
+          file: ./Dockerfile
