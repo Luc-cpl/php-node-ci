@@ -12,7 +12,7 @@ jobs:
       - name: Check for dockerfile changes
         id: image_change
         run: |
-          REGISTRY=luccpl
+          REGISTRY=${{ secrets.DOCKERHUB_REGISTRY }}
           IMAGE=php-node-ci
           IMAGE_VERSION=$(grep -oP '(?<=ARG IMAGE_VERSION=).+' ${IMAGE}/Dockerfile)
           TAGGED_IMAGE=${REGISTRY}/${IMAGE}:${IMAGE_VERSION}
@@ -35,8 +35,8 @@ jobs:
         with:
           docker_username: ${{ secrets.DOCKERHUB_USERNAME }}
           docker_token: ${{ secrets.DOCKERHUB_TOKEN }}
-          image_registry: luccpl
-          image_repository: php
+          image_registry: ${{ secrets.DOCKERHUB_REGISTRY }}
+          image_repository: php-node-ci
           image_tag: ${{ steps.image_change.outputs.IMAGE_TAG }}
           context: .
           file: ./Dockerfile
