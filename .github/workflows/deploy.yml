@@ -14,7 +14,7 @@ jobs:
         run: |
           REGISTRY=${{ secrets.DOCKERHUB_REGISTRY }}
           IMAGE=php-node-ci
-          IMAGE_VERSION=$(grep -oP '(?<=ARG IMAGE_VERSION=).+' ${IMAGE}/Dockerfile)
+          IMAGE_VERSION=$(grep -oP '(?<=ARG IMAGE_VERSION=).+' ./Dockerfile)
           TAGGED_IMAGE=${REGISTRY}/${IMAGE}:${IMAGE_VERSION}
           echo "Checking for image: $TAGGED_IMAGE"
 
