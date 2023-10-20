@@ -17,7 +17,7 @@ starttime=$(date +%s)
 # Copy files from the volume to the workdir
 # Do not copy dependencies, node_modules, releases and vendor folders
 echo "syncing files from $volumedir to $workdir..."
-rsync -a --delete --exclude 'dependencies' --exclude 'node_modules' --exclude 'modules' --exclude 'packages' --exclude 'releases' --exclude 'vendor' "$volumedir/" "$workdir"
+rsync -a --delete --exclude 'dependencies' --exclude 'node_modules' --exclude 'modules' --exclude 'packages' --exclude 'release' --exclude 'releases' --exclude 'vendor' "$volumedir/" "$workdir"
 
 # Get the time difference in seconds
 timediff=$(($(date +%s)-$starttime))
