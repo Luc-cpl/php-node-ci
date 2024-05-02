@@ -1,9 +1,9 @@
-ARG IMAGE_VERSION=2
+ARG IMAGE_VERSION=3
 
 FROM ubuntu:22.04
 
 ENV TZ=UTC
-ENV NODE_MAJOR=16
+ENV NODE_MAJOR=22
 ENV PHP_VERSION=8.2
 
 # Remove interaction while installing or upgrading via apt and select a default timezone
@@ -40,6 +40,7 @@ RUN apt-get install -y \
 
 # PHP
 RUN add-apt-repository ppa:ondrej/php && apt-get update && apt-get install -y php$PHP_VERSION
+RUN update-alternatives --set php /usr/bin/php$PHP_VERSION
 RUN apt-get install -y \
     php$PHP_VERSION-curl \
     php$PHP_VERSION-gd \
